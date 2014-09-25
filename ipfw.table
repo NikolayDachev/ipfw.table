@@ -1,0 +1,46 @@
+#!/usr/bin/env  python
+
+import sys
+import syslog
+import subprocess
+
+if len(sys.argv) < 3:
+   print "usage: ipfw.table 'table number' '/ip/file/path'"
+   sys.exit(1)
+
+ipfwTableNumber = sys.argv[1]
+ipfwTable = sys.argv[2]
+
+#
+# check existing table
+#
+cmd = 'ipfw table %s list' % ipfwTableNumber
+proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+
+ips = []
+for line in proc.stdout:
+  ip = line.strip('\n')
+  ips.append(ip.split('/')[0])
+
+#
+# add ipfw table content 
+#
+ipfwTD = open('%s' % ipfwTable, 'r')
+ipfwDeny = []
+
+for i in ipfwTD:
+   i = i.strip('\n')
+   if i != '':
+      ipfwDeny.append(i)
+
+for x in ipfwDeny:
+   x = x.strip('\n')
+   if x not in ips:
+      subprocess.call('ipfw table %s add %s' % (ipfwTableNumber, x), shell=True)
+      msg = "ipfw.table1 add '%s' to ipfw table %s" % (x, ipfwTableNumber)
+   else:
+      msg = "'%s' exist in ipfw table %s" % (x, ipfwTableNumber)
+
+# log msg
+   syslog.syslog(syslog.LOG_NOTICE, msg)
+   print msg
