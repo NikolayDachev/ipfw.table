@@ -13,4 +13,8 @@ example:
     1 - tbale number
     /etc/ipfw.deny - file with ip addresses
 
-   file should content one ip address per line (only ip address - no subnet)
+File should content one ip address per line (only ip address - no subnet):
+
+    1.2.3.4
+    2.3.4.5
+    6.7.8.9
